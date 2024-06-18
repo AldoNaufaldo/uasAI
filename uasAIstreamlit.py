@@ -37,6 +37,11 @@ def plot_scatter(x, y, title):
     ax.set_title(title)
     return fig
 
+# Function to display data in a table below the plot
+def display_data_table(data, title):
+    st.write(f"### {title} Data:")
+    st.write(data)
+
 # Model Training and Evaluation - Linear Regression
 lin_reg_model = LinearRegression()
 lin_reg_model.fit(X_train, Y_train)
@@ -46,12 +51,14 @@ train_error = metrics.r2_score(Y_train, training_data_prediction)
 
 fig_train = plot_scatter(Y_train, training_data_prediction, "Actual Prices vs Predicted Prices (Train)")
 st.pyplot(fig_train)
+display_data_table(pd.DataFrame({'Actual Price': Y_train, 'Predicted Price': training_data_prediction}), "Training")
 
 test_data_prediction = lin_reg_model.predict(X_test)
 test_error = metrics.r2_score(Y_test, test_data_prediction)
 
 fig_test = plot_scatter(Y_test, test_data_prediction, "Actual Prices vs Predicted Prices (Test)")
 st.pyplot(fig_test)
+display_data_table(pd.DataFrame({'Actual Price': Y_test, 'Predicted Price': test_data_prediction}), "Test")
 
 # Model Training and Evaluation - Lasso Regression
 lasso_reg_model = Lasso()
@@ -62,12 +69,14 @@ train_error_lasso = metrics.r2_score(Y_train, training_data_prediction_lasso)
 
 fig_train_lasso = plot_scatter(Y_train, training_data_prediction_lasso, "Actual Prices vs Predicted Prices (Train) - Lasso")
 st.pyplot(fig_train_lasso)
+display_data_table(pd.DataFrame({'Actual Price': Y_train, 'Predicted Price': training_data_prediction_lasso}), "Training - Lasso")
 
 test_data_prediction_lasso = lasso_reg_model.predict(X_test)
 test_error_lasso = metrics.r2_score(Y_test, test_data_prediction_lasso)
 
 fig_test_lasso = plot_scatter(Y_test, test_data_prediction_lasso, "Actual Prices vs Predicted Prices (Test) - Lasso")
 st.pyplot(fig_test_lasso)
+display_data_table(pd.DataFrame({'Actual Price': Y_test, 'Predicted Price': test_data_prediction_lasso}), "Test - Lasso")
 
 # Closing figures to release resources (optional)
 plt.close(fig_train)
