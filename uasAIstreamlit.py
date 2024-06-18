@@ -68,7 +68,7 @@ try:
     display_data_table(pd.DataFrame({'Actual Price': Y_test, 'Predicted Price': test_data_prediction}), "Test")
 
     # Model Training and Evaluation - Lasso Regression
-    lasso_reg_model = Lasso()
+    lasso_reg_model = Lasso(alpha=1.0)  # Ensure alpha is set to a default value
     lasso_reg_model.fit(X_train, Y_train)
 
     training_data_prediction_lasso = lasso_reg_model.predict(X_train)
