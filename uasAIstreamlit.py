@@ -35,6 +35,8 @@ def plot_scatter(x, y, title):
     ax.set_xlabel("Actual Price")
     ax.set_ylabel("Predicted Price")
     ax.set_title(title)
+    for i, txt in enumerate(car_dataset.index):
+        ax.annotate(txt, (x[i], y[i]))
     return fig
 
 # Function to display data in a table below the plot
