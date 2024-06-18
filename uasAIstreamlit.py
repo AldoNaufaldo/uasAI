@@ -3,6 +3,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression, Lasso
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
 from sklearn import metrics
 
 # Function to load data and process it
@@ -60,8 +63,18 @@ def main():
         st.write(test_data.isnull().sum())
 
         # Encoding categorical columns
-        train_data = pd.get_dummies(train_data, columns=['Fuel_Type', 'Seller_Type', 'Transmission'], drop_first=True)
-        test_data = pd.get_dummies(test_data, columns=['Fuel_Type', 'Seller_Type', 'Transmission'], drop_first=True)
+        categorical_cols = ['Fuel_Type', 'Seller_Type', 'Transmission']
+        preprocessor = ColumnTransformer(
+            transformers=[
+                ('cat', OneHotEncoder(drop='first'), categorical_cols)
+            ], remainder='passthrough'
+        )
+
+        # Define pipeline
+        pipeline = Pipeline(steps=[
+            ('preprocessor', preprocessor),
+            ('regressor', LinearRegression())  # You can change this to Lasso() if needed
+        ])
 
         # Splitting the data and Target
         X_train = train_data.drop(['Car_Name', 'Selling_Price'], axis=1)
@@ -70,47 +83,27 @@ def main():
         X_test = test_data.drop(['Car_Name', 'Selling_Price'], axis=1)
         Y_test = test_data['Selling_Price']
 
-        # Model Training and Evaluation - Linear Regression
-        lin_reg_model = LinearRegression()
-        lin_reg_model.fit(X_train, Y_train)
+        # Model Training and Evaluation
+        pipeline.fit(X_train, Y_train)
 
-        training_data_prediction = lin_reg_model.predict(X_train)
+        # Predictions
+        training_data_prediction = pipeline.predict(X_train)
         train_error = metrics.r2_score(Y_train, training_data_prediction)
 
         fig_train = plot_scatter(Y_train, training_data_prediction, "Actual Prices vs Predicted Prices (Train)")
         st.pyplot(fig_train)
         display_data_table(pd.DataFrame({'Actual Price': Y_train, 'Predicted Price': training_data_prediction}), "Training")
 
-        test_data_prediction = lin_reg_model.predict(X_test)
+        test_data_prediction = pipeline.predict(X_test)
         test_error = metrics.r2_score(Y_test, test_data_prediction)
 
         fig_test = plot_scatter(Y_test, test_data_prediction, "Actual Prices vs Predicted Prices (Test)")
         st.pyplot(fig_test)
         display_data_table(pd.DataFrame({'Actual Price': Y_test, 'Predicted Price': test_data_prediction}), "Test")
 
-        # Model Training and Evaluation - Lasso Regression
-        lasso_reg_model = Lasso()
-        lasso_reg_model.fit(X_train, Y_train)
-
-        training_data_prediction_lasso = lasso_reg_model.predict(X_train)
-        train_error_lasso = metrics.r2_score(Y_train, training_data_prediction_lasso)
-
-        fig_train_lasso = plot_scatter(Y_train, training_data_prediction_lasso, "Actual Prices vs Predicted Prices (Train) - Lasso")
-        st.pyplot(fig_train_lasso)
-        display_data_table(pd.DataFrame({'Actual Price': Y_train, 'Predicted Price': training_data_prediction_lasso}), "Training - Lasso")
-
-        test_data_prediction_lasso = lasso_reg_model.predict(X_test)
-        test_error_lasso = metrics.r2_score(Y_test, test_data_prediction_lasso)
-
-        fig_test_lasso = plot_scatter(Y_test, test_data_prediction_lasso, "Actual Prices vs Predicted Prices (Test) - Lasso")
-        st.pyplot(fig_test_lasso)
-        display_data_table(pd.DataFrame({'Actual Price': Y_test, 'Predicted Price': test_data_prediction_lasso}), "Test - Lasso")
-
         # Closing figures to release resources (optional)
         plt.close(fig_train)
         plt.close(fig_test)
-        plt.close(fig_train_lasso)
-        plt.close(fig_test_lasso)
 
     else:
         st.info("Please upload both training and testing CSV files in the sidebar.")
