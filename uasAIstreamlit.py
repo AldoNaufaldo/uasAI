@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression, Lasso
 from sklearn import metrics
 
@@ -20,8 +19,8 @@ def load_data(filename):
 def plot_scatter(x, y, title):
     fig, ax = plt.subplots()
     ax.scatter(x, y)
-    ax.set_xlabel("Harga yang sebenarnya")
-    ax.set_ylabel("Harga yang diprediksi")
+    ax.set_xlabel("Harga yang sebenarnya (ribuan $)")
+    ax.set_ylabel("Harga yang diprediksi (ribuan $)")
     ax.set_title(title)
     return fig
 
@@ -36,14 +35,15 @@ def main():
 
     # Sidebar untuk mengunggah file
     st.sidebar.title("Unggah File")
-    training_file = st.sidebar.file_uploader("Unggah Data Latihan (CSV)", type=['csv'])
     testing_file = st.sidebar.file_uploader("Unggah Data Uji (CSV)", type=['csv'])
 
-    if training_file and testing_file:
+    # Memuat data latihan dari file yang sudah ada
+    train_data = load_data('data_training.csv')
+
+    if testing_file:
         st.sidebar.info("File berhasil diunggah")
 
-        # Memuat data latihan dan uji
-        train_data = load_data(training_file)
+        # Memuat data uji
         test_data = load_data(testing_file)
 
         # Menampilkan data dan info dasar
@@ -82,7 +82,7 @@ def main():
         st.write("### Grafik Hasil Latihan dengan Regresi Linear:")
         fig_train = plot_scatter(Y_train, training_data_prediction, "Harga yang sebenarnya vs Harga yang diprediksi (Latihan)")
         st.pyplot(fig_train)
-        display_data_table(pd.DataFrame({'Harga yang sebenarnya': Y_train, 'Harga yang diprediksi': training_data_prediction}), "Hasil Latihan dengan Regresi Linear")
+        display_data_table(pd.DataFrame({'Harga yang sebenarnya (ribuan $)': Y_train, 'Harga yang diprediksi (ribuan $)': training_data_prediction}), "Hasil Latihan dengan Regresi Linear")
 
         test_data_prediction = lin_reg_model.predict(X_test)
         test_error = metrics.r2_score(Y_test, test_data_prediction)
@@ -90,7 +90,7 @@ def main():
         st.write("### Grafik Hasil Uji:")
         fig_test = plot_scatter(Y_test, test_data_prediction, "Harga yang sebenarnya vs Harga yang diprediksi")
         st.pyplot(fig_test)
-        display_data_table(pd.DataFrame({'Harga yang sebenarnya': Y_test, 'Harga yang diprediksi': test_data_prediction}), "Hasil Uji")
+        display_data_table(pd.DataFrame({'Harga yang sebenarnya (ribuan $)': Y_test, 'Harga yang diprediksi (ribuan $)': test_data_prediction}), "Hasil Uji")
 
         # Pelatihan Model dan Evaluasi - Lasso Regression
         lasso_reg_model = Lasso()
@@ -102,7 +102,7 @@ def main():
         st.write("### Grafik Hasil Latihan dengan Lasso Regression:")
         fig_train_lasso = plot_scatter(Y_train, training_data_prediction_lasso, "Harga yang sebenarnya vs Harga yang diprediksi (Latihan)")
         st.pyplot(fig_train_lasso)
-        display_data_table(pd.DataFrame({'Harga yang sebenarnya': Y_train, 'Harga yang diprediksi': training_data_prediction_lasso}), "Hasil Latihan dengan Lasso Regression")
+        display_data_table(pd.DataFrame({'Harga yang sebenarnya (ribuan $)': Y_train, 'Harga yang diprediksi (ribuan $)': training_data_prediction_lasso}), "Hasil Latihan dengan Lasso Regression")
 
         test_data_prediction_lasso = lasso_reg_model.predict(X_test)
         test_error_lasso = metrics.r2_score(Y_test, test_data_prediction_lasso)
@@ -110,7 +110,7 @@ def main():
         st.write("### Grafik Hasil Uji:")
         fig_test_lasso = plot_scatter(Y_test, test_data_prediction_lasso, "Harga yang sebenarnya vs Harga yang diprediksi")
         st.pyplot(fig_test_lasso)
-        display_data_table(pd.DataFrame({'Harga yang sebenarnya': Y_test, 'Harga yang diprediksi': test_data_prediction_lasso}), "Hasil Uji")
+        display_data_table(pd.DataFrame({'Harga yang sebenarnya (ribuan $)': Y_test, 'Harga yang diprediksi (ribuan $)': test_data_prediction_lasso}), "Hasil Uji")
 
         # Menutup figur untuk membebaskan sumber daya (opsional)
         plt.close(fig_train)
@@ -119,7 +119,7 @@ def main():
         plt.close(fig_test_lasso)
 
     else:
-        st.info("Silakan unggah file CSV.")
+        st.info("Silakan unggah file CSV untuk data uji.")
 
 if __name__ == '__main__':
     main()
